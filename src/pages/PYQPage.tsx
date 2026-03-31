@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Search, ChevronDown, ChevronUp, Download, Eye, Filter } from "lucide-react";
+import DownloadConfirmModal from "@/components/DownloadConfirmModal";
 
 const subjects = ["All", "Data Structures", "Operating Systems", "DBMS", "Computer Networks", "TOC", "Software Engg", "Algorithms"];
 const years = ["All Years", "2024", "2023", "2022", "2021", "2020", "2019"];
@@ -23,7 +24,7 @@ export default function PYQPage() {
   const [activeYear, setActiveYear] = useState("All Years");
   const [activeSem, setActiveSem] = useState("All Sems");
   const [filtersOpen, setFiltersOpen] = useState(true);
-
+  const [downloadTarget, setDownloadTarget] = useState<typeof papers[0] | null>(null);
   const filtered = papers.filter((p) => {
     const matchSearch = p.subject.toLowerCase().includes(search.toLowerCase());
     const matchSubject = activeSubject === "All" || p.subject === activeSubject;
@@ -156,13 +157,29 @@ export default function PYQPage() {
               <button className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-muted text-muted-foreground text-xs font-medium hover:bg-accent hover:text-accent-foreground transition-all">
                 <Eye className="w-3.5 h-3.5" /> Preview
               </button>
-              <button className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-all shadow-card">
+              <button
+                onClick={() => setDownloadTarget(p)}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-all shadow-card"
+              >
                 <Download className="w-3.5 h-3.5" /> Download
               </button>
             </div>
           </div>
         ))}
       </div>
+
+      <DownloadConfirmModal
+        open={!!downloadTarget}
+        onClose={() => setDownloadTarget(null)}
+        onConfirm={() => console.log("Downloading:", downloadTarget?.subject)}
+        subject={downloadTarget?.subject ?? ""}
+        details={downloadTarget ? [
+          { label: "Year", value: downloadTarget.year },
+          { label: "Semester", value: downloadTarget.sem },
+          { label: "Type", value: downloadTarget.type },
+          { label: "Pages", value: `${downloadTarget.pages} pages` },
+        ] : []}
+      />
     </div>
   );
 }

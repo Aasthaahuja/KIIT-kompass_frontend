@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Search, Download, BookOpen, Clock, Star } from "lucide-react";
+import DownloadConfirmModal from "@/components/DownloadConfirmModal";
 
 const categories = ["All", "CSE Core", "Mathematics", "Physics", "Electives", "Lab Manuals"];
 
@@ -18,6 +19,7 @@ const notes = [
 export default function NotesPage() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+  const [downloadTarget, setDownloadTarget] = useState<typeof notes[0] | null>(null);
 
   const filtered = notes.filter((n) => {
     const matchSearch = n.subject.toLowerCase().includes(search.toLowerCase());
@@ -97,12 +99,28 @@ export default function NotesPage() {
               </span>
             </div>
 
-            <button className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-all shadow-card">
+            <button
+              onClick={() => setDownloadTarget(n)}
+              className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-all shadow-card"
+            >
               <Download className="w-3.5 h-3.5" /> Download PDF
             </button>
           </div>
         ))}
       </div>
+
+      <DownloadConfirmModal
+        open={!!downloadTarget}
+        onClose={() => setDownloadTarget(null)}
+        onConfirm={() => console.log("Downloading:", downloadTarget?.subject)}
+        subject={downloadTarget?.subject ?? ""}
+        details={downloadTarget ? [
+          { label: "Semester", value: downloadTarget.sem },
+          { label: "Pages", value: `${downloadTarget.pages} pages` },
+          { label: "Size", value: downloadTarget.size },
+          { label: "Contributor", value: downloadTarget.contributor },
+        ] : []}
+      />
     </div>
   );
 }
